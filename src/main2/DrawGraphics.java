@@ -43,6 +43,7 @@ import main.MyObject;
 public class DrawGraphics extends JFrame implements ActionListener{
 	//定义参数对象，该对象保存画图需要的参数信息
 	static MyObject mo;
+	
 	JButton bigger = null;
 	JButton smaller = null;
 	JButton clear = null;
@@ -53,35 +54,20 @@ public class DrawGraphics extends JFrame implements ActionListener{
 	
 	static File file = null;
 	//标记图形坐标已回到源文件大小
-	static int flag = 0;
+	static int flagX = 0;
+	static int flagY = 0;
 	//放大的倍数
 	static int time = 2; 
 	
-	private int width = 1000;
-    private int height = 800;
+	private int width = 1600;
+    private int height = 1200;
 	
-	 private int dx = 50;
-	 private int dy = 50;
-	 
-	 MyPanel mp = null;
+	MyPanel mp = null;
 	
 	public static void main(String[] args) {
-		try {
-			mo = new MyObject();
-			//读取根目录下的txt文件
-//			File file=new File("/ID5381 Page 1 FrontAndBack-draw89747562404.txt");
-//			File file=new File("e:/ID5381 Page 1 head_front-draw89747563443.txt");
-			if(file != null && file.isFile() && file.exists()){ 
-				mo = getFileData(file,mo);
-				flag = mo.getX_list().get(0);
-			}
-			//实例化画图对象
-			DrawGraphics dg = new DrawGraphics(mo);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		mo = new MyObject();
+		//实例化画图对象
+		DrawGraphics dg = new DrawGraphics(mo);
 	}
 	
 	/**
@@ -93,11 +79,6 @@ public class DrawGraphics extends JFrame implements ActionListener{
 		mp_0.setBackground(Color.GRAY);
 		
 		mp = new MyPanel(mo);
-		
-		
-//		mp.setPreferredSize(new Dimension(5000, 2000));
-//		JScrollPane sp=new JScrollPane(mp);
-		
 		
 		Choosefiles = new JButton("选择文件");
 		bigger = new JButton("放大");
@@ -117,57 +98,41 @@ public class DrawGraphics extends JFrame implements ActionListener{
 		clear.addActionListener(this);
 		Choosefiles.addActionListener(this);
 		
-		//鼠标监听
-//		MyListener m = new MyListener();
-//
-//		mp.addMouseListener(m);
-//
-//		mp.addMouseMotionListener(m);
-		
-		
+		//注册滚轮监听
 		this.addMouseWheelListener(new MouseWheelListener() {
             
             public void mouseWheelMoved(MouseWheelEvent e) {
-            	System.out.println(1);
                 if(e.getWheelRotation() < 0){
                     zoom();
                 }else{
                     reduce();
                 }
-                 
             }
         });
-		
+		//监听鼠标
 		MouseAdapter ma = new MouseAdapter(){
-			
-			@Override
-            public void mouseClicked(MouseEvent e) {
-                zoom();
-            }
-			
             boolean moveEnable = false;
             Point point1 = null;
             Point point2 = null;
             
+            //鼠标按下
             @Override
             public void mousePressed(MouseEvent e) {
                 moveEnable = true;
                 point1 = e.getPoint();
             }
- 
+            //鼠标松开
             @Override
             public void mouseReleased(MouseEvent e) {
                 moveEnable = false; 
                 point1 = null;
                 point2 = null;
             }
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                //System.out.println("move");
-            }
+            
+            //鼠标拖拽
             @Override
             public void mouseDragged(MouseEvent e) {
-//                System.out.println("dragged");
+            	//TODO mo为空时，不触发
                 point2 = e.getPoint();
                 if(moveEnable){
                     if(point1 != null && point2 != null){
@@ -190,15 +155,9 @@ public class DrawGraphics extends JFrame implements ActionListener{
         mp.addMouseListener(ma);
 		
 		
-		
-		
-		
-		
-		
 		//设置窗体大小
 //		this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         this.setSize(width,height);
-//		this.setSize(1000,800);
 		//设置窗体显示的位置
 		this.setLocation(0, 0);
 		//设置窗体大小不可变
@@ -211,13 +170,10 @@ public class DrawGraphics extends JFrame implements ActionListener{
 	}
 
 	/**
-	 * 事件监听
+	 * 按钮事件监听
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
-		
-		
 		//选择上传的文件
 		if(e.getSource() == Choosefiles) {
 			JFileChooser chooser = new JFileChooser(".");
@@ -228,7 +184,8 @@ public class DrawGraphics extends JFrame implements ActionListener{
 				file = chooser.getSelectedFile();
 				try {
 					mo = getFileData(file,mo);
-					flag = mo.getX_list().get(0);
+					this.getXYData();
+					System.out.println("x:" + Collections.min(mo.getX_list()));
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -241,30 +198,16 @@ public class DrawGraphics extends JFrame implements ActionListener{
 		//按2倍放大
 		if(e.getSource() == bigger){
 			zoom();
-//			for(int i=0;i<mo.getX_list().size();i++){
-//				mo.getX_list().set(i, (int)(mo.getX_list().get(i)*time));
-//				mo.getY_list().set(i, (int)(mo.getY_list().get(i)*time));
-//			}
-			System.out.println(mo.getX_list().get(0));
 		}
 		//按2倍缩小
 		else if(e.getSource() == smaller){
-//			if(flag != 0 && mo.getX_list().get(0) == flag){
-//				return;
-//			}
-//			for(int i=0;i<mo.getX_list().size();i++){
-//				mo.getX_list().set(i, (int)(mo.getX_list().get(i)/time));
-//				mo.getY_list().set(i, (int)(mo.getY_list().get(i)/time));
-//			}
 			reduce();
-			System.out.println(mo.getX_list().get(0));
 		}else if(e.getSource() == clear){
 			mo.setX_list(null);
 			mo.setY_list(null);
 			mo.setColorNumber(null);
 			mo.setgSize(0);
 			mo.setName(null);
-			System.out.println(mo.getX_list());
 		}
 		
 		mp.repaint();
@@ -332,11 +275,22 @@ public class DrawGraphics extends JFrame implements ActionListener{
      */
     public void reduce(){
     	if(mo != null){
+//    		System.out.println("minx:" + Collections.min(mo.getX_list()));
+    		//当缩小到（100，100）这个点的时候不能再缩小
+    		int min_i = Collections.min(mo.getX_list());
+    		if(min_i <= 100){
+    			for(int i = 0;i < mo.getX_list().size();i++){
+    				if(mo.getX_list().get(i) == min_i){
+    					if(mo.getY_list().get(i) <= 100){
+    						return;
+    					}
+    				}
+    			}
+				return;
+			}
     		for(int i=0;i<mo.getX_list().size();i++){
-				mo.getX_list().set(i, mo.getX_list().get(i)+dx);
-				mo.getY_list().set(i, mo.getY_list().get(i)+dy);
-				width -= 2 * dx;
-	            height -= 2 * dy;
+				mo.getX_list().set(i, (int)(mo.getX_list().get(i)/time));
+				mo.getY_list().set(i, (int)(mo.getY_list().get(i)/time));
 			}
     	}
             
@@ -348,26 +302,40 @@ public class DrawGraphics extends JFrame implements ActionListener{
      * 放大
      */
     public void zoom(){
-    	
     	if(mo != null){
-    		//TODO
-    		int minx = Collections.min(mo.getX_list());
     		for(int i=0;i<mo.getX_list().size();i++){
-				mo.getX_list().set(i, mo.getX_list().get(i)-dx);
-				mo.getY_list().set(i, mo.getY_list().get(i)-dy);
-				width += 2 * dx;
-	            height += 2 * dy;
+				mo.getX_list().set(i, (int)(mo.getX_list().get(i)*time));
+				mo.getY_list().set(i, (int)(mo.getY_list().get(i)*time));
 			}
-    		
-//    		for(int i=0;i<mo.getX_list().size();i++){
-//				mo.getX_list().set(i, (int)(mo.getX_list().get(i)*time));
-//				mo.getY_list().set(i, (int)(mo.getY_list().get(i)*time));
-//			}
     	}
         super.repaint();
     }
-	
-	
+	/**
+	 * 处理xy坐标(找出最左端的点，将其平移至（100，100）)
+	 * @return
+	 */
+    public void getXYData(){
+		int min_x = Collections.min(mo.getX_list());
+		int min_y = 0;
+		for (int i = 0;i < mo.getX_list().size();i++ ){
+			if(min_x == mo.getX_list().get(i)){
+				if(min_y == 0){
+					min_y = mo.getY_list().get(i);
+				}else{
+					if(mo.getY_list().get(i) < min_y)
+						min_y = mo.getY_list().get(i);
+				}
+				
+			}
+		}
+		for(int i = 0;i < mo.getX_list().size();i++){
+			mo.getX_list().set(i, mo.getX_list().get(i) - (min_x-100));
+		}
+		for(int i = 0;i < mo.getY_list().size();i++){
+			mo.getY_list().set(i, mo.getY_list().get(i) - (min_y-100));
+		}
+		
+    }
 
 }
 
@@ -396,6 +364,7 @@ class MyPanel extends JPanel{
 			return;
 		}
 		
+		System.out.println("x:" + Collections.min(myObject.getX_list()));
 		//左边部分开始--------------------------------
 		//创建颜色
 		Color color=new Color(myObject.getColorNumber().get(0),myObject.getColorNumber().get(1),myObject.getColorNumber().get(2)); 
@@ -454,56 +423,4 @@ class MyPanel extends JPanel{
 	}
 }
 
-/**
- * 鼠标监听
- * @author wen-sr
- *
- */
-class MyListener extends MouseAdapter {
 
-	// 这两组x和y为鼠标点下时在屏幕的位置和拖动时所在的位置
-	int newX, newY, oldX, oldY;
-
-	// 这两个坐标为组件当前的坐标
-	int startX, startY;
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-
-		// 得到事件源组件
-		Component cp = (Component) e.getSource();
-
-		// 当鼠标点下的时候记录组件当前的坐标与鼠标当前在屏幕的位置
-		startX = cp.getX();
-
-		startY = cp.getY();
-
-		oldX = e.getXOnScreen();
-
-		oldY = e.getYOnScreen();
-
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
-
-		Component cp = (Component) e.getSource();
-
-		// 拖动的时候记录新坐标
-		
-		newX = e.getXOnScreen();
-
-		newY = e.getYOnScreen();
-
-		System.out.println("width:" + cp.getWidth() + " ,height:" + cp.getHeight());
-		System.out.println("startX:" + startX + " , newX:" + newX);
-		
-		// 设置bounds,将点下时记录的组件开始坐标与鼠标拖动的距离相加
-		cp.setBounds(startX + (newX - oldX), startY + (newY - oldY),
-				cp.getWidth(), cp.getHeight());
-		
-		
-
-	}
-
-}
